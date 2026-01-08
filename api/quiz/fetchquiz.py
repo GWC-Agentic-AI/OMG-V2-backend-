@@ -2,7 +2,7 @@ from fastapi import Query,APIRouter,HTTPException
 from schemas.quiz.quiz import GenerateQuizRequest
 from datetime import date
 from db.session import get_db
-from db.config import settings
+from config import settings
 
 router = APIRouter()
 

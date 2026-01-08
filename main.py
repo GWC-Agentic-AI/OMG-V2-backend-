@@ -38,10 +38,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+
 app.include_router(chat_router, prefix="/bot",tags=['chatbot'],dependencies=[Depends(static_auth)])
 app.include_router(history_router, prefix="/bot",tags=['chatbot'],dependencies=[Depends(static_auth)])
-app.include_router(generate_quiz_router,prefix="/quiz", tags=["Quiz"],dependencies=[Depends(static_auth)])
-app.include_router(translate_auiz_router,prefix="/quiz", tags=["Quiz"],dependencies=[Depends(static_auth)])
 app.include_router(generate_quiz_router,prefix="/quiz", tags=["Quiz"],dependencies=[Depends(static_auth)])
 app.include_router(translate_auiz_router,prefix="/quiz", tags=["Quiz"],dependencies=[Depends(static_auth)])
 app.include_router(fetch_quiz,prefix="/quiz",tags=["Quiz"],dependencies=[Depends(static_auth)])
