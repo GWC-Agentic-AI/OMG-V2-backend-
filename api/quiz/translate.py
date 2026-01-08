@@ -6,7 +6,7 @@ from schemas.quiz.quiz import TranslateRequest
 from langchain_openai import ChatOpenAI
 
 from db.session import get_db
-from db.config import settings
+from config import settings
 
 router = APIRouter()
 

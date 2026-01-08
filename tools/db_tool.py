@@ -2,7 +2,7 @@ from langchain.tools import tool
 from utils.logger import get_logger
 
 from db.session import get_db
-from db.config import settings
+from config import settings
 
 logger = get_logger("temple_db_tool")
 

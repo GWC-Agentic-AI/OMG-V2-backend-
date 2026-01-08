@@ -1,10 +1,10 @@
 from langchain_core.messages import HumanMessage, AIMessage
 
 from db.session import get_db
-from db.config import settings
+from config import settings
 
 MAX_CONTEXT_MESSAGES = 12
-APP_DB_NAME = settings.TEMPLE_DB
+APP_DB_NAME = settings.AI_DB
 
 
 def save_message(user_id: str, session_id: str, role: str, content: str):

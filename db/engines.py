@@ -1,6 +1,6 @@
 import psycopg2
 from psycopg2.pool import SimpleConnectionPool
-from db.config import settings
+from config import settings
 
 _POOLS = {}
 

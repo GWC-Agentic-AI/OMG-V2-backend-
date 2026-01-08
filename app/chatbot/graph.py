@@ -14,7 +14,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from models.LLM import load_llm
 from tools.db_tool import temple_db_tool
 from tools.tavily_search import web_search_tool
-from PROMPTS.prompts import ROUTER_SYSTEM_PROMPT, FINAL_SYSTEM_PROMPT
+from PROMPTS.chatbot.prompts import ROUTER_SYSTEM_PROMPT, FINAL_SYSTEM_PROMPT
 from utils.logger import get_logger
 
 

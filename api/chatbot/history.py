@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from schemas.chatbot.chat_models import ConversationOut
-from utils.chat_memory import fetch_full_conversation
+from services.chatbot.chat_memory import fetch_full_conversation
 
 router = APIRouter()
 

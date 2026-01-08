@@ -8,7 +8,7 @@ from schemas.quiz.quiz import GenerateQuizRequest
 from app.quiz.graph import quiz_graph
 
 from db.session import get_db
-from db.config import settings
+from config import settings
 
 router = APIRouter()
 

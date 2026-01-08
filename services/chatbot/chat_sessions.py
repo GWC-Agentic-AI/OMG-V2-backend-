@@ -1,7 +1,7 @@
 from db.session import get_db
-from db.config import settings
+from config import settings
 
-APP_DB_NAME = settings.TEMPLE_DB
+APP_DB_NAME = settings.AI_DB
 
 
 def session_exists(user_id: str, session_id: str) -> bool:
