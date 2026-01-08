@@ -17,9 +17,6 @@ APP_DB_NAME = settings.APP_DB
 
 @router.post("/generate")
 async def generate_quiz(req: GenerateQuizRequest):
-    if not req.auth:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
     quiz_id = None
     questions = []
 

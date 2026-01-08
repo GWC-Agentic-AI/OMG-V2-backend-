@@ -17,9 +17,6 @@ APP_DB_NAME = settings.APP_DB
 
 @router.post("/translate")
 async def translate_quiz(req: TranslateRequest):
-    if not req.auth:
-        raise HTTPException(status_code=401, detail="Unauthorized")
-
     try:
         with get_db(APP_DB_NAME) as conn:
             with conn.cursor() as cur:
