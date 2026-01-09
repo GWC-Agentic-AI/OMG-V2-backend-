@@ -12,5 +12,5 @@ def load_llm():
     return ChatOpenAI(
         api_key=api_key,
         temperature=0.2,
-        model="gpt-4o-mini"
+        model="gpt-4.1"
     )
