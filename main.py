@@ -15,6 +15,9 @@ from api.vishnugpt.chat import router as vishugpt_chat_router
 from api.vishnugpt.sessions import router as vishnugpt_session_router
 from api.quiz.fetchquiz import router as fetch_quiz
 from api.quiz.fetchquiz import router as fetch_today_quiz
+from api.ai_assistant.chat import router as ai_assistant_router
+from api.ai_assistant.history import router as ai_assistant_history_router
+
 from core.auth import static_auth
 
 logger = get_logger('Server')
@@ -48,6 +51,8 @@ app.include_router(fetch_quiz,prefix="/quiz",tags=["Quiz"],dependencies=[Depends
 app.include_router(fetch_today_quiz,prefix="/quiz",tags=["Quiz"],dependencies=[Depends(static_auth)])
 app.include_router(vishugpt_chat_router, prefix="/vishnugpt",tags=['vishnugpt'],dependencies=[Depends(static_auth)])
 app.include_router(vishnugpt_session_router, prefix="/vishnugpt",tags=['vishnugpt'],dependencies=[Depends(static_auth)])
+app.include_router(ai_assistant_router, prefix="/ai_assistant",tags=['AI Assistant'],dependencies=[Depends(static_auth)])
+app.include_router(ai_assistant_history_router, prefix="/ai_assistant",tags=['AI Assistant'],dependencies=[Depends(static_auth)])
 
 
 @app.get("/")
@@ -61,6 +66,6 @@ async def global_exception_handler(request: Request, exc: Exception):
     return JSONResponse(status_code=500, content={"error": "Internal server error"})
 
 # UNCOMMAND FOR LOCAL MACHINE TESTING
-# if __name__ == "__main__":
-#     uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False)
 

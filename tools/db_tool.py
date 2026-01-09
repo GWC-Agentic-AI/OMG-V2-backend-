@@ -11,11 +11,52 @@ TEMPLE_DB_NAME = settings.TEMPLE_DB
 
 def resolve_temple_fuzzy(temple_name: str, limit: int = 2):
     """
-    Resolve temple using fuzzy matching directly on temples table.
-    No alias table is used.
+        Fetch verified Hindu temple details from the official temple database.
 
-    Runs STRICTLY on omg-temple-db
-    """
+        PURPOSE:
+        - Retrieve accurate, authoritative information about Hindu temples
+        using fuzzy name matching.
+        - Designed ONLY for Hindu temple-related queries.
+
+        WHEN TO USE:
+        - Temple name lookup
+        - Temple history, deity, location
+        - Darshan timings and special timings
+        - Temple amenities, festivals, and description
+        - Address and geographic details
+
+        INPUT:
+        - temple_name (str): Name of the temple provided by the user.
+        Partial or approximate names are supported.
+
+        OUTPUT:
+        - A list of matching temples ordered by relevance (confidence score).
+        - Each result may include:
+            - temple_id
+            - name
+            - deity
+            - city, state, address
+            - timings and special_timings
+            - history and description
+            - festivals and amenities
+            - website (if available)
+            - latitude and longitude
+            - confidence score (similarity match)
+
+        IMPORTANT RULES:
+        - This tool queries ONLY the verified internal temple database.
+        - It MUST NOT be used for:
+            - Festival dates
+            - Muhurtham or calendar calculations
+            - Non-temple or non-Hindu topics
+        - If the result is EMPTY, the caller SHOULD:
+            - Use a fallback search tool
+            - Or ask the user for clarification
+
+        DATA GUARANTEE:
+        - All returned data is database-sourced.
+        - No external knowledge or assumptions are used.
+        """
 
     sql = """
     SELECT
@@ -30,7 +71,11 @@ def resolve_temple_fuzzy(temple_name: str, limit: int = 2):
         history,
         festivals,
         amenities,
-        similarity(name, %(q)s) AS score
+        similarity(name, %(q)s) AS score,
+        address,
+        lat,
+        long,
+        special_timings
     FROM "Temples"
     WHERE similarity(name, %(q)s) > 0.3
     ORDER BY score DESC
@@ -62,6 +107,10 @@ def resolve_temple_fuzzy(temple_name: str, limit: int = 2):
             "festivals": r[9],
             "amenities": r[10],
             "confidence": r[11],
+            "address":r[12],
+            "lat":r[13],
+            "long":r[14],
+            "special_timings":r[15]
         }
         for r in rows
     ]
