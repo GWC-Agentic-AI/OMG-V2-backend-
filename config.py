@@ -8,7 +8,7 @@ class Settings(BaseSettings):
 
     APP_DB: str = "omg-appcontrol-db"
     TEMPLE_DB: str = "omg-temple-db"
-    AI_DB : str = "quiz_check"
+    AI_DB : str = "omg-ai-db"
     
     token_limit: int = 3500
     max_history_messages: int = 50
