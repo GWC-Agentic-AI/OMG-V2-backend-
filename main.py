@@ -11,8 +11,6 @@ from api.chatbot.chat import router as chat_router
 from api.chatbot.history import router as history_router
 from api.quiz.generate import router as generate_quiz_router
 from api.quiz.translate import router as translate_auiz_router
-from api.vishnugpt.chat import router as vishugpt_chat_router
-from api.vishnugpt.sessions import router as vishnugpt_session_router
 from api.quiz.fetchquiz import router as fetch_quiz
 from api.quiz.fetchquiz import router as fetch_today_quiz
 from api.ai_assistant.chat import router as ai_assistant_router
@@ -20,6 +18,8 @@ from api.ai_assistant.history import router as ai_assistant_history_router
 from api.rituals.daily_ritual import router as rituals_routers
 
 from core.auth import static_auth
+from api.vishnugpt.chat import router as vishugpt_chat_router
+from api.vishnugpt.sessions import router as vishnugpt_session_router
 
 logger = get_logger('Server')
 

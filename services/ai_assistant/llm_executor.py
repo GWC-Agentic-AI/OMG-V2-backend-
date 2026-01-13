@@ -13,6 +13,7 @@ async def run_agent(
     vishnu_persona: bool,
 ) -> str:
     try:
+        # graph.get_graph().draw_mermaid_png(output_file_path="output.png")
         result = await asyncio.to_thread(
             graph.invoke,
             {

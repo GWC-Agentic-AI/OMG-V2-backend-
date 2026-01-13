@@ -1,5 +1,5 @@
 from typing_extensions import TypedDict
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from langchain_core.messages import (
     AnyMessage,
@@ -21,8 +21,10 @@ from PROMPTS.ai_assistant.prompts import (
 from PROMPTS.ai_assistant.vishnu_persona import VISHNU_PERSONA_PROMPT
 from PROMPTS.ai_assistant.persona_reset import RESET_PERSONA_PROMPT
 from PROMPTS.ai_assistant.router_vishnu import ROUTER_PROMPT_VISHNU
+from agents.itinerary.itinerary_agent import _itinerary_logic
+from services.itinerary.intent import is_itinerary_intent
 from utils.logger import get_logger
-
+import logging
 
 logger = get_logger("spiritual_graph")
 
@@ -46,6 +48,70 @@ class State(TypedDict):
     needs_fallback: bool
     fallback_used: bool
     vishnu_persona: bool
+    intent: str
+
+    trip_days: Optional[int]
+    itinerary_query: Optional[str]
+
+    itinerary_in_progress: bool = None
+    itinerary_completed: bool = None
+
+def intent_router_node(state: State):
+    last_user_msg = None
+    for msg in reversed(state["messages"]):
+        if msg.type == "human":
+            last_user_msg = msg.content
+            break
+    print("[INFO] last user message",last_user_msg)
+
+    if not last_user_msg:
+        return {"intent": "general"}
+
+    # print(f"[INFO] STATE - {state}")
+    # CASE 1: Itinerary in progress → continue asking for days / generate
+    if state.get("itinerary_in_progress"):
+        print("[INFO] CASE 1 Executed")
+        return {"intent": "itinerary"}
+
+    # CASE 2: Itinerary completed → only allow NEW itinerary if user explicitly asks for a trip plan
+    if state.get("itinerary_completed"):
+        print("[INFO] CASE 2 Executed")
+        result = is_itinerary_intent(llm, last_user_msg)
+        if result["is_itinerary"] and result["trip_days"]:
+            # New itinerary request with trip_days → start fresh
+            return {
+                "intent": "itinerary",
+                "trip_days": result["trip_days"],
+                "itinerary_query": last_user_msg,
+                "itinerary_in_progress": True,
+                "itinerary_completed": False,
+            }
+        # Any other question → general chat
+        state["itinerary_in_progress"] = False
+        return {"intent": "general"}
+ 
+
+    # CASE 3: Fresh intent detection
+    result = is_itinerary_intent(llm, last_user_msg)
+    if result["is_itinerary"]:
+        print("[INFO] CASE 3 Executed")
+        return {
+            "intent": "itinerary",
+            "trip_days": result["trip_days"],
+            "itinerary_query": last_user_msg,
+            "itinerary_in_progress": True,
+            "itinerary_completed": False,
+        }
+
+    # CASE 4: General question
+    return {"intent": "general"}
+
+
+
+def itinerary_node(state: State):
+    response = _itinerary_logic(state)
+    print("[INFO] RESPONSE MSG FROM NODE",response)
+    return response
 
 
 # =========================
@@ -141,13 +207,25 @@ def final_node(state: State):
 # =========================
 builder = StateGraph(State)
 
+builder.add_node("intent_router", intent_router_node)
+builder.add_node("itinerary", itinerary_node)
 builder.add_node("router", router_node)
 builder.add_node("tools", ToolNode(tools))
 builder.add_node("validate", validator_node)
 builder.add_node("fallback_router", fallback_router_node)
 builder.add_node("final", final_node)
 
-builder.add_edge(START, "router")
+# builder.add_edge(START, "router")
+builder.add_edge(START, "intent_router")
+
+builder.add_conditional_edges(
+    "intent_router",
+    lambda s: s.get("intent", "general"),
+    {
+        "itinerary": "itinerary",
+        "general": "router",
+    }
+)
 
 builder.add_conditional_edges(
     "router",

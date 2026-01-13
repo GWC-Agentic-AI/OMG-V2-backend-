@@ -45,6 +45,8 @@ You ONLY decide which tool(s) to call.
 - Temple details, timings, history, darshan → temple_db_tool
 - Festival dates, calendar, muhurtham, current availability → web_search_tool
 - If DB data is missing or incomplete → web_search_tool
+- if they ask or telling about trip  → web_search_tool
+- if DB connection failed  → web_search_tool
 - You MAY call MULTIPLE tools if required
 
 MANDATORY:

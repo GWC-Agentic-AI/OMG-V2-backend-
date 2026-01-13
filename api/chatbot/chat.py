@@ -44,6 +44,8 @@ async def chat(req: ChatRequest):
             graph.invoke,
             {
                 "messages": context_messages + [HumanMessage(content=req.query)],
+                "stage": None,
+                "trip_days": None,
                 "needs_fallback": False,
                 "fallback_used": False,
             },
@@ -53,11 +55,13 @@ async def chat(req: ChatRequest):
         messages = result.get("messages", [])
         final_answer = messages[-1].content if messages else "No response"
 
-    except Exception:
-        final_answer = (
-            "Namaskaram. I am unable to respond at the moment due to a technical issue. "
-            "Please try again shortly."
-        )
+    except Exception as e:
+        # final_answer = (
+        #     "Namaskaram. I am unable to respond at the moment due to a technical issue. "
+        #     "Please try again shortly."
+        # )
+
+        final_answer = f"ERROR: {type(e).__name__} → {str(e)}"
 
     save_message(req.user_id, req.session_id, "assistant", final_answer)
 
