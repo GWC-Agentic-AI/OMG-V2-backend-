@@ -87,3 +87,5 @@ async def generate_quiz(req: GenerateQuizRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
