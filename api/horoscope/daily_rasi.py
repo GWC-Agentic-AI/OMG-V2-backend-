@@ -41,11 +41,7 @@ def translate_today(langcode: str):
         raise HTTPException(400, "English already exists")
 
     today = date.today()
-
-    # 1️⃣ Fetch today's English horoscope
     english_rows = fetch_today_english()
-
-    # 2️⃣ Fallback to latest English horoscope
     if not english_rows:
         english_rows = fetch_latest_english()
 
@@ -61,8 +57,6 @@ def translate_today(langcode: str):
 
     for row in english_rows:
         rasi = row["rasi"]
-
-        # Optional: skip if already translated
         if is_translation_exists(rasi, today, langcode):
             continue
 
@@ -96,47 +90,101 @@ def translate_today(langcode: str):
     }
 
 
-@router.get("/today")
-def get_today(langcode: str = "en"):
-    today = date.today().isoformat()
+@router.get("/fetchallrasi")
+def get_today(langcode: str = "en", date_user: str | None = None):
+    horoscope_date = date_user or date.today().isoformat()
 
     with get_db(APP_DB_NAME) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
+
+            final_lang = langcode
+            if langcode != "en":
+                cur.execute(
+                    """
+                    SELECT 1
+                    FROM daily_horoscope
+                    WHERE horoscope_date = %s
+                      AND langcode = %s
+                    LIMIT 1
+                    """,
+                    (horoscope_date, langcode)
+                )
+                exists = cur.fetchone()
+
+                if not exists:
+                    final_lang = "en"  
             cur.execute(
                 """
                 SELECT
                     rasi_code,
                     rasi_name,
-                    health, career, love, wealth, travel, summary, ratings
+                    health,
+                    career,
+                    love,
+                    wealth,
+                    travel,
+                    summary,
+                    ratings,
+                    langcode
                 FROM daily_horoscope
-                WHERE horoscope_date = %s AND langcode = %s
+                WHERE horoscope_date = %s
+                  AND langcode = %s
                 ORDER BY rasi_code
                 """,
-                (today, langcode)
+                (horoscope_date, final_lang)
             )
-            return cur.fetchall()
+
+            data = cur.fetchall()
+
+    return {
+        "date": horoscope_date,
+        "requested_lang": langcode,
+        "served_lang": final_lang,
+        "count": len(data),
+        "data": data
+    }
 
 
 
-@router.get("/today/{rasi}")
-def get_today_single(rasi: str, langcode: str = "en"):
-    today = date.today().isoformat()
+
+
+@router.get("/fetch")
+def get_today_single(
+    rasi: str,
+    langcode: str = "en",
+    date_user: str | None = None
+):
+    horoscope_date = date_user or date.today().isoformat()
+    rasi_value = rasi.title()
 
     with get_db(APP_DB_NAME) as conn:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
             cur.execute(
                 """
-                SELECT * FROM daily_horoscope
-                WHERE rasi=%s AND horoscope_date=%s AND langcode=%s
+                SELECT *
+                FROM daily_horoscope
+                WHERE rasi = %s
+                  AND horoscope_date = %s
+                  AND langcode = %s
                 """,
-                (rasi.title(), today, langcode)
+                (rasi_value, horoscope_date, langcode)
             )
             row = cur.fetchone()
 
+            if not row and langcode != "en":
+                cur.execute(
+                    """
+                    SELECT *
+                    FROM daily_horoscope
+                    WHERE rasi = %s
+                      AND horoscope_date = %s
+                      AND langcode = 'en'
+                    """,
+                    (rasi_value, horoscope_date)
+                )
+                row = cur.fetchone()
+
     if not row:
-        raise HTTPException(404, "Horoscope not available")
+        raise HTTPException(status_code=404, detail="Horoscope not available")
 
     return row
-
-
-
